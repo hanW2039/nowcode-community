@@ -4,6 +4,7 @@ import com.hanw.community.dao.UserMapper;
 
 
 import com.hanw.community.entity.User;
+import com.hanw.community.util.CommunityConstant;
 import com.hanw.community.util.CommunityUtil;
 import com.hanw.community.util.MailClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ import java.util.Random;
  * @create 2022-07-30 20:17
  */
 @Service
-public class UserService {
+public class UserService implements CommunityConstant {
     @Autowired
     private UserMapper userMapper;
 
@@ -95,6 +96,18 @@ public class UserService {
         String content = templateEngine.process("/mail/activation", context);
         mailClient.sendMail(user.getEmail(),"激活账号",content);
         return map;
+    }
+
+    public int activation(int userId,String code){
+        User u = userMapper.selectById(userId);
+        if(u.getStatus() == 1){
+            return ACTIVATION_REPEAT;
+        }else if(u.getActivationCode().equals(code)){
+            userMapper.updateStatus(userId,1);
+            return ACTIVATION_SUCCESS;
+        }else{
+            return ACTIVATION_FAILURE;
+        }
     }
 
 }
