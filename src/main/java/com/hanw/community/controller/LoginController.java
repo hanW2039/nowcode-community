@@ -5,17 +5,21 @@ import com.hanw.community.config.KaptchaConfig;
 import com.hanw.community.entity.User;
 import com.hanw.community.service.UserService;
 import com.hanw.community.util.CommunityConstant;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -35,7 +39,8 @@ public class LoginController implements CommunityConstant {
     private UserService userService;
     @Autowired
     private Producer kaptchaproduce;
-
+    @Value("${server.servlet.context-path}")
+    private String contextPath;
     @RequestMapping(path ="/login",method = RequestMethod.GET)
     public String getLoginPage(){
         return "/site/login";
@@ -95,6 +100,39 @@ public class LoginController implements CommunityConstant {
         } catch (IOException e) {
             logger.error("响应验证码失败" + e.getMessage());
         }
+    }
+    //path与进入登陆页面相同，但method不同，所以可以区分
+    @RequestMapping(path="/login",method=RequestMethod.POST)
+    public String login(HttpServletResponse response,Model model,String username,String password,String code,boolean rememberme,HttpSession session){
+        String kaptcha = (String)session.getAttribute("kaptcha");
+        //equalsIgnoreCase()方法忽略大小写
+        //检查验证码
+        if(StringUtils.isBlank(kaptcha) || StringUtils.isBlank(code) || !code.equalsIgnoreCase(kaptcha)){
+            model.addAttribute("codeMsg","验证码不正确！");
+            return "/site/login";
+        }
+        //验证账号、密码
+        int expiredSeconds = rememberme?REMEMBER_EXPIRED_SECONDS:DEFAULT_EXPIRED_SECONDS;
+        Map<String, Object> map = userService.login(username, password, expiredSeconds);
+        if(map.containsKey("ticket")){
+            Cookie cookie = new Cookie("ticket",map.get("ticket").toString());
+            //设置cookie的有效路径
+            cookie.setPath(contextPath);
+            //设置cookie的最长有效时间
+            cookie.setMaxAge(expiredSeconds);
+            //响应时返回cookie
+            response.addCookie(cookie);
+            return "redirect:/index";
+        }else{
+            model.addAttribute("usernameMsg",map.get("usernameMessage"));
+            model.addAttribute("passwordMsg",map.get("passwordMessage"));
+            return "/site/login";
+        }
+    }
+    @RequestMapping(path="/logout",method=RequestMethod.GET)
+    public String logout(@CookieValue("ticket") String ticket){
+        userService.logout(ticket);
+        return "redirect:/login";
     }
 }
 

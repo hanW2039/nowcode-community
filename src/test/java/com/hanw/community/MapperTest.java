@@ -1,8 +1,10 @@
 package com.hanw.community;
 
 import com.hanw.community.dao.DiscussPostMapper;
+import com.hanw.community.dao.LoginTicketMapper;
 import com.hanw.community.dao.UserMapper;
 import com.hanw.community.entity.DiscussPost;
+import com.hanw.community.entity.LoginTicket;
 import com.hanw.community.entity.User;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import sun.security.krb5.internal.Ticket;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -25,7 +29,8 @@ public class MapperTest {
     private UserMapper userMapper;
     @Autowired
     private DiscussPostMapper discussPostMapper;
-
+    @Autowired
+    private LoginTicketMapper loginTicketMapper;
     @Test
     public void testSelectUser(){
         User user = userMapper.selectById(101);
@@ -58,5 +63,26 @@ public class MapperTest {
         }
         int test1 = discussPostMapper.selectDiscussPostRows(101);
         System.out.println(test1);
+    }
+
+    @Test
+    public void testInsertLoginTicket(){
+        LoginTicket ticket = new LoginTicket();
+        ticket.setTicket("1234");
+        ticket.setId(1);
+        ticket.setStatus(1);
+        ticket.setExpired(new Date());
+        int i = loginTicketMapper.insertLoginTicket(ticket);
+        System.out.println(i);
+    }
+
+    @Test
+    public void testSelectLoginTicket(){
+        LoginTicket loginTicket = loginTicketMapper.selectByTicket("1234");
+        System.out.println(loginTicket);
+    }
+    @Test
+    public void testUpdateLoginTicket(){
+        loginTicketMapper.updateStatus("1234",0);
     }
 }
