@@ -1,5 +1,6 @@
 package com.hanw.community.controller;
 
+import com.hanw.community.annotation.LoginRequired;
 import com.hanw.community.entity.User;
 import com.hanw.community.service.UserService;
 import com.hanw.community.util.CommunityUtil;
@@ -43,12 +44,13 @@ public class UserController {
     private UserService userService;
     @Autowired
     private HostHolder hostHolder;
-
+    @LoginRequired
     @RequestMapping(path="/setting",method=RequestMethod.GET)
     public String getSettingPage(){
         return "/site/setting";
     }
 
+    @LoginRequired
     @RequestMapping(path="/upload",method=RequestMethod.POST)
     public String uploadHeader(MultipartFile headerImage, Model model){
         if(headerImage == null){
@@ -108,7 +110,7 @@ public class UserController {
             }
         }
     }
-
+    @LoginRequired
     @RequestMapping(path = "/update",method = RequestMethod.POST)
     public String updatePassword(@CookieValue("ticket") String ticket,Model model, String oldPwd, String newPwd, String confirmPwd){
         User user = hostHolder.getUser();
