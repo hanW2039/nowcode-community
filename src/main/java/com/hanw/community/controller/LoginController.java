@@ -41,15 +41,14 @@ public class LoginController implements CommunityConstant {
     private Producer kaptchaproduce;
     @Value("${server.servlet.context-path}")
     private String contextPath;
+
     @RequestMapping(path ="/login",method = RequestMethod.GET)
     public String getLoginPage(){
         return "/site/login";
     }
     @RequestMapping(path = "/register",method = RequestMethod.GET)
-    public String getRegisterPage() {
-
-        return "/site/register" ;
-    }
+    public String getRegisterPage() { return "/site/register"; }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
 
     @RequestMapping(path="/register",method=RequestMethod.POST)
     //只要页面传值，request中的信息如果和user里的属性对应，就会自动赋值
