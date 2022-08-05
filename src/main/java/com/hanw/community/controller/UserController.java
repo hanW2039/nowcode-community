@@ -11,11 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.event.FolderAdapter;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -105,9 +107,36 @@ public class UserController {
                 }
             }
         }
-
     }
 
+    @RequestMapping(path = "/update",method = RequestMethod.POST)
+    public String updatePassword(@CookieValue("ticket") String ticket,Model model, String oldPwd, String newPwd, String confirmPwd){
+        User user = hostHolder.getUser();
+        String oldpassword = oldPwd + user.getSalt();
+        oldpassword =CommunityUtil.md5(oldpassword);
+        String newpassword = newPwd + user.getSalt();
+        newpassword =CommunityUtil.md5(newpassword);
+
+        if(StringUtils.isBlank(oldPwd) || !oldpassword.equals(user.getPassword())){
+            model.addAttribute("oldpwderror","原密码错误或为空");
+            return "/site/setting";
+        }
+        if(StringUtils.isBlank(newPwd)){
+            model.addAttribute("newPwderror","新密码不能为空");
+            return "/site/setting";
+        }
+        if(newpassword.equals(oldpassword)){
+            model.addAttribute("newPwderror","新密码不能与原密码相同");
+            return "/site/setting";
+        }
+        if(!confirmPwd.equals(newPwd)){
+            model.addAttribute("confirmPwderror","两次输入的密码不一致!");
+            return "/site/setting";
+        }
+        userService.updatePassword(user.getId(),newpassword);
+        userService.logout(ticket);
+        return "redirect:/login";
+    }
 
 
 }
