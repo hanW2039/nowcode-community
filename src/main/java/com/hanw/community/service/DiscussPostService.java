@@ -34,11 +34,14 @@ public class DiscussPostService {
         }
         //转义HTML标记
         discussPost.setTitle(HtmlUtils.htmlEscape(discussPost.getTitle()));
-        discussPost.setContext(HtmlUtils.htmlEscape(discussPost.getContext()));
+        discussPost.setContent(HtmlUtils.htmlEscape(discussPost.getContent()));
         //过滤敏感词
         discussPost.setTitle(sensitiveFilter.filter(discussPost.getTitle()));
-        discussPost.setContext(sensitiveFilter.filter(discussPost.getContext()));
+        discussPost.setContent(sensitiveFilter.filter(discussPost.getContent()));
         return discussPostMapper.insertDiscussPost(discussPost);
     }
 
+    public DiscussPost findDiscussPostById(int id){
+        return discussPostMapper.selectDiscussPostById(id);
+    }
 }

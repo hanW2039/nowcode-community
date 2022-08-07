@@ -43,12 +43,12 @@ public class DiscussPost {
         this.title = title;
     }
 
-    public String getContext() {
+    public String getContent() {
         return content;
     }
 
-    public void setContext(String context) {
-        this.content = context;
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public int getType() {

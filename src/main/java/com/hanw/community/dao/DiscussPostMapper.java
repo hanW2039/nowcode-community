@@ -17,6 +17,7 @@ public interface DiscussPostMapper {
     //mapper中的sql需要动态的拼接参数，且参数只有一个，要用@Param()给参数取别名,否则报错
     int selectDiscussPostRows(@Param("userId") int userId);
 
-    //
     int insertDiscussPost(DiscussPost discussPost);
+
+    DiscussPost selectDiscussPostById(int id);
 }
