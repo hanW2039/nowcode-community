@@ -132,7 +132,7 @@
 								<ul class="d-inline float-right">
 									<li class="d-inline ml-2"><a href="#" class="text-primary">赞(1)</a></li>
 									<li class="d-inline ml-2">|</li>
-									<li class="d-inline ml-2"><a href="#" class="text-primary">回复(<i ${cvo.replyCount}}>3</i>)</a></li>
+									<li class="d-inline ml-2"><a href="#" class="text-primary">回复(<i th:text="${cvo.replyCount}">1</i>)</a></li>
 								</ul>
 							</div>
 							<!-- 回复列表 -->
@@ -143,7 +143,7 @@
 											<b class="text-info" th:text="${rvo.user.username}">寒江雪</b>:&nbsp;&nbsp;
 										</span>
 										<span th:if="${rvo.target!=null}">
-											<i class="text-info" th:text="${rvo.user.usernaem}">sisssi</i>回复
+											<i class="text-info" th:text="${rvo.user.username}">sisssi</i>回复
 											<b class="text-info" th:text="${rvo.target.username}">寒江雪</b>:&nbsp;&nbsp;
 										</span>
 										<span th:text="${rvo.reply.content}">这个是直播时间哈，觉得晚的话可以直接看之前的完整录播的~</span>
@@ -153,27 +153,36 @@
 										<ul class="d-inline float-right">
 											<li class="d-inline ml-2"><a href="#" class="text-primary">赞(1)</a></li>
 											<li class="d-inline ml-2">|</li>
-											<li class="d-inline ml-2"><a th:href="|huifu-${rvoStat.count}|" data-toggle="collapse" class="text-primary">回复</a></li>
+											<li class="d-inline ml-2"><a th:href="|#huifu-${rvoStat.count}|" data-toggle="collapse" class="text-primary">回复</a></li>
 										</ul>
 										<div th:id="|huifu-${rvoStat.count}|" class="mt-4 collapse">
-											<div>
-												<input type="text" class="input-size" th:placeholder="|回复${rvo.user.username}|"/>
-											</div>
-											<div class="text-right mt-2">
-												<button type="button" class="btn btn-primary btn-sm" onclick="#">&nbsp;&nbsp;回&nbsp;&nbsp;复&nbsp;&nbsp;</button>
-											</div>										
+											<form method="post" th:action="@{|/comment/add/${post.id}|}">
+												<div>
+													<input type="text" class="input-size" name="content" th:placeholder="|回复${rvo.user.username}|"/>
+													<input type="hidden" name="entityType" value="2">
+													<input type="hidden" name="entityId" th:value="${cvo.comment.id}">
+													<input type="hidden" name="targetId" th:value="${rvo.user.id}">
+												</div>
+												<div class="text-right mt-2">
+													<button type="submit" class="btn btn-primary btn-sm" onclick="#">&nbsp;&nbsp;回&nbsp;&nbsp;复&nbsp;&nbsp;</button>
+												</div>
+											</form>
 										</div>
 									</div>								
 								</li>
 
 								<!-- 回复输入框 -->
 								<li class="pb-3 pt-3">
-									<div>
-										<input type="text" class="input-size" placeholder="请输入你的观点"/>
-									</div>
-									<div class="text-right mt-2">
-										<button type="button" class="btn btn-primary btn-sm" onclick="#">&nbsp;&nbsp;回&nbsp;&nbsp;复&nbsp;&nbsp;</button>
-									</div>
+									<form method="post" th:action="@{|/comment/add/${post.id}|}">
+										<div>
+											<input type="text" class="input-size" placeholder="请输入你的观点" name="content"/>
+											<input type="hidden" name="entityType" value="2">
+											<input type="hidden" name="entityId" th:value="${cvo.comment.id}">
+										</div>
+										<div class="text-right mt-2">
+											<button type="submit" class="btn btn-primary btn-sm" onclick="#">&nbsp;&nbsp;回&nbsp;&nbsp;复&nbsp;&nbsp;</button>
+										</div>
+									</form>
 								</li>
 							</ul>
 						</div>
@@ -196,10 +205,12 @@
 			</div>
 			<!-- 回帖输入 -->
 			<div class="container mt-3">
-				<form class="replyform">
+				<form class="replyform" th:action="@{|/comment/add/${post.id}|}" method="post">
 					<p class="mt-3">
 						<a name="replyform"></a>
-						<textarea placeholder="在这里畅所欲言你的看法吧!"></textarea>
+						<textarea placeholder="在这里畅所欲言你的看法吧!" name="content"></textarea>
+						<input type="hidden" name="entityType" value="1">
+						<input type="hidden" name="entityId" th:value="${post.id}">
 					</p>
 					<p class="text-right">
 						<button type="submit" class="btn btn-primary btn-sm">&nbsp;&nbsp;回&nbsp;&nbsp;帖&nbsp;&nbsp;</button>
