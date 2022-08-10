@@ -2,9 +2,11 @@ package com.hanw.community;
 
 import com.hanw.community.dao.DiscussPostMapper;
 import com.hanw.community.dao.LoginTicketMapper;
+import com.hanw.community.dao.MessageMapper;
 import com.hanw.community.dao.UserMapper;
 import com.hanw.community.entity.DiscussPost;
 import com.hanw.community.entity.LoginTicket;
+import com.hanw.community.entity.Message;
 import com.hanw.community.entity.User;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +33,9 @@ public class MapperTest {
     private DiscussPostMapper discussPostMapper;
     @Autowired
     private LoginTicketMapper loginTicketMapper;
+    @Autowired
+    private MessageMapper messageMapper;
+
     @Test
     public void testSelectUser(){
         User user = userMapper.selectById(101);
@@ -84,5 +89,28 @@ public class MapperTest {
     @Test
     public void testUpdateLoginTicket(){
         loginTicketMapper.updateStatus("1234",0);
+    }
+
+    @Test
+    public void testSelectLetters() {
+        List<Message> list = messageMapper.selectConversations(103, 0, 20);
+        for (Message message : list) {
+            System.out.println(message);
+        }
+
+        int count = messageMapper.selectConversationCount(103);
+        System.out.println(count);
+
+        list = messageMapper.selectLetters("101_103", 0, 10);
+        for (Message message : list) {
+            System.out.println(message);
+        }
+
+        count = messageMapper.selectLetterCount("101_103");
+        System.out.println(count);
+
+        count = messageMapper.selectLetterUnreadCount(103, "101_103");
+        System.out.println(count);
+
     }
 }
