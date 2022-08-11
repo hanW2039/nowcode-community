@@ -5,18 +5,18 @@ import com.hanw.community.entity.Page;
 import com.hanw.community.entity.User;
 import com.hanw.community.service.MessageService;
 import com.hanw.community.service.UserService;
+import com.hanw.community.util.CommunityUtil;
 import com.hanw.community.util.HostHolder;
+import com.sun.xml.internal.ws.api.policy.ModelUnmarshaller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author hanW
@@ -76,6 +76,11 @@ public class MessageController {
         }
         model.addAttribute("letters",letters);
         model.addAttribute("target",getLetterTarget(conversationId));
+
+        List<Integer> ids = getLetterIds(letterList);
+        if(!ids.isEmpty()){
+            messageService.readMessage(ids);
+        }
         return "/site/letter-detail";
     }
 
@@ -89,6 +94,43 @@ public class MessageController {
         }else{
             return userService.findUserById(id0);
         }
+    }
+
+    @RequestMapping(path="/letter/send",method=RequestMethod.POST)
+    @ResponseBody
+    public String sendLetter(String toName,String content){
+        User target = userService.findUserByName(toName);
+        if(target == null){
+            return CommunityUtil.getJSONString(1,"目标用户不存在");
+        }
+        Message letter = new Message();
+        letter.setContent(content);
+        letter.setCreateTime(new Date());
+        letter.setStatus(0);
+        int userId = hostHolder.getUser().getId();
+        String conversationId = null;
+        if(userId > target.getId()){
+            conversationId = target.getId() + "_" + userId;
+        }else{
+            conversationId = userId + "_" + target.getId();
+        }
+        letter.setConversationId(conversationId);
+        letter.setFromId(userId);
+        letter.setToId(target.getId());
+        messageService.addMessage(letter);
+        return CommunityUtil.getJSONString(0);
+    }
+
+    private List<Integer> getLetterIds(List<Message> letterList){
+        List<Integer> ids = new ArrayList<>();
+        if(letterList != null){
+            for(Message message : letterList){
+                if(hostHolder.getUser().getId() == message.getToId() && message.getStatus() == 0){
+                    ids.add(message.getId());
+                }
+            }
+        }
+        return ids;
     }
 }
 

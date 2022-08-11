@@ -2,10 +2,12 @@ package com.hanw.community.service;
 
 import com.hanw.community.dao.MessageMapper;
 import com.hanw.community.entity.Message;
+import com.hanw.community.util.SensitiveFilter;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.List;
 
@@ -17,6 +19,8 @@ import java.util.List;
 public class MessageService {
     @Autowired
     private MessageMapper messageMapper;
+    @Autowired
+    private SensitiveFilter sensitiveFilter;
 
     public List<Message> findConversations(int userId, int offset, int limit) {
         return messageMapper.selectConversations(userId, offset, limit);
@@ -36,5 +40,17 @@ public class MessageService {
 
     public int findLetterUnreadCount(int userId, String conversationId) {
         return messageMapper.selectLetterUnreadCount(userId, conversationId);
+    }
+
+    public int addMessage(Message message){
+        //转义HTML标记
+        message.setContent(HtmlUtils.htmlEscape(message.getContent()));
+        //过滤敏感词
+        message.setContent(sensitiveFilter.filter(message.getContent()));
+        return messageMapper.insertMessage(message);
+    }
+
+    public int readMessage(List<Integer> ids){
+        return messageMapper.updateStatus(ids,1);
     }
 }

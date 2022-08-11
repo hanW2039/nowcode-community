@@ -116,23 +116,23 @@ public class UserService implements CommunityConstant {
     }
 
     public Map<String,Object> login(String username,String password,long expiredSeconds){
-       Map<String,Object> map = new HashMap<>();
-       //空之判断
-       if(StringUtils.isBlank(username)){
-           map.put("usernameMessage","账号不能为空");
-           return map;
-       }
-       if(StringUtils.isBlank(password)){
-           map.put("passwordMessage","密码不能为空");
-           return map;
-       }
+        Map<String,Object> map = new HashMap<>();
+        //空之判断
+        if(StringUtils.isBlank(username)){
+            map.put("usernameMessage","账号不能为空");
+            return map;
+        }
+        if(StringUtils.isBlank(password)){
+            map.put("passwordMessage","密码不能为空");
+            return map;
+        }
         User user = userMapper.selectByName(username);
         //验证账号
-       if(null == user){
-           map.put("usernameMessage","账号不存在！");
-           return map;
-       }
-       //验证是否激活
+        if(null == user){
+            map.put("usernameMessage","账号不存在！");
+            return map;
+        }
+        //验证是否激活
         if(user.getStatus() == 0){
             map.put("usernameMessage","该账号未激活！");
             return map;
@@ -170,5 +170,9 @@ public class UserService implements CommunityConstant {
 
     public int updatePassword(int id,String password){
         return userMapper.updatePassword(id,password);
+    }
+
+    public User findUserByName(String username){
+        return userMapper.selectByName(username);
     }
 }
