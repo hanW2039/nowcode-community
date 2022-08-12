@@ -22,4 +22,7 @@ public class HostHolder {
     public void clear(){
         users.remove();
     }
+
+    public void get() {
+    }
 }

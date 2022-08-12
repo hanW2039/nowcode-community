@@ -2,8 +2,10 @@ package com.hanw.community.controller;
 
 import com.hanw.community.annotation.LoginRequired;
 import com.hanw.community.entity.User;
+import com.hanw.community.service.FollowService;
 import com.hanw.community.service.LikeService;
 import com.hanw.community.service.UserService;
+import com.hanw.community.util.CommunityConstant;
 import com.hanw.community.util.CommunityUtil;
 import com.hanw.community.util.HostHolder;
 import com.hanw.community.util.RedisKeyUtil;
@@ -33,7 +35,7 @@ import java.util.UUID;
  */
 @Controller
 @RequestMapping(path="/user")
-public class UserController {
+public class UserController implements CommunityConstant {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Value("${community.path.upload}")
@@ -49,6 +51,9 @@ public class UserController {
     private HostHolder hostHolder;
     @Autowired
     private LikeService likeService;
+    @Autowired
+    private FollowService followService;
+
     @LoginRequired
     @RequestMapping(path="/setting",method=RequestMethod.GET)
     public String getSettingPage(){
@@ -152,8 +157,21 @@ public class UserController {
             throw new RuntimeException("该用户不存在");
         }
         model.addAttribute("user",user);
+        //点赞数量
         int likeCount = likeService.findUserLikeCount(userId);
         model.addAttribute("likeCount",likeCount);
+        //关注数量
+        Long followeeCount = followService.followeeCount(userId, EMTITY_TYPE_USER);
+        model.addAttribute("followeeCount",followeeCount);
+        //粉丝数量
+        Long followerCount = followService.followerCount(userId,EMTITY_TYPE_USER);
+        model.addAttribute("followerCount",followerCount);
+        //是否关注
+        boolean hasFollowed = false;
+        if(hostHolder.getUser() != null){
+            hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(), EMTITY_TYPE_USER, userId);
+        }
+        model.addAttribute("hasFollowed",hasFollowed);
         return "/site/profile";
     }
 }

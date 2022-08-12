@@ -26,4 +26,8 @@ public interface CommunityConstant {
      */
     int EMTITY_TYPE_COMMENT = 2;
 
+    /*
+    实体类型 人
+     */
+    int EMTITY_TYPE_USER = 3;
 }
