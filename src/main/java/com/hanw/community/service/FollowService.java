@@ -1,5 +1,7 @@
 package com.hanw.community.service;
 
+import com.hanw.community.entity.User;
+import com.hanw.community.util.CommunityConstant;
 import com.hanw.community.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -8,15 +10,18 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Service;
 
+import java.util.*;
+
 /**
  * @author hanW
  * @create 2022-08-12 10:47
  */
 @Service
-public class FollowService {
+public class FollowService implements CommunityConstant {
     @Autowired
     private RedisTemplate redisTemplate;
-
+    @Autowired
+    private UserService userService;
 
     public void follow(int entityType,int entityId,int userId){
         redisTemplate.execute(new SessionCallback() {
@@ -47,13 +52,13 @@ public class FollowService {
     }
 
     //查询关注的实体数量
-    public Long followeeCount(int userId,int entityType){
+    public long followeeCount(int userId,int entityType){
         String followeeKey = RedisKeyUtil.getFolloweeKey(userId, entityType);
         return redisTemplate.opsForZSet().zCard(followeeKey);
     }
 
     //查询实体粉丝数
-    public Long followerCount(int entityId,int entityType){
+    public long followerCount(int entityId,int entityType){
         String followerKey = RedisKeyUtil.getFollowerKey(entityType,entityId);
         return redisTemplate.opsForZSet().zCard(followerKey);
     }
@@ -62,5 +67,42 @@ public class FollowService {
         String followeeKey = RedisKeyUtil.getFolloweeKey(userId, entityType);
         return redisTemplate.opsForZSet().score(followeeKey,entityId) != null;
 
+    }
+
+    //查询关注的人
+    public List<Map<String,Object>> followeeList(int userId,int offSet,int limit){
+        String followeeKey = RedisKeyUtil.getFolloweeKey(userId, EMTITY_TYPE_USER);
+        Set<Integer> targetIds = redisTemplate.opsForZSet().reverseRange(followeeKey, offSet, offSet + limit - 1);
+        if(targetIds == null){
+            return null;
+        }
+        List<Map<String,Object>> list = new ArrayList<>();
+        for (Integer targetId : targetIds){
+            Map<String,Object> map = new HashMap<>();
+            User user = userService.findUserById(targetId);
+            map.put("user",user);
+            Double score = redisTemplate.opsForZSet().score(followeeKey, targetId);
+            map.put("followTime",new Date(score.longValue()));
+            list.add(map);
+        }
+        return list;
+    }
+    //查询某用户的粉丝
+    public List<Map<String,Object>> followerList(int userId,int offSet,int limit){
+        String followerKey = RedisKeyUtil.getFollowerKey(EMTITY_TYPE_USER,userId);
+        Set<Integer> targetIds = redisTemplate.opsForZSet().reverseRange(followerKey, offSet, offSet + limit - 1);
+        if(targetIds == null){
+            return null;
+        }
+        List<Map<String,Object>> list = new ArrayList<>();
+        for (Integer targetId : targetIds){
+            Map<String,Object> map = new HashMap<>();
+            User user = userService.findUserById(targetId);
+            map.put("user",user);
+            Double score = redisTemplate.opsForZSet().score(followerKey, targetId);
+            map.put("followTime",new Date(score.longValue()));
+            list.add(map);
+        }
+        return list;
     }
 }
