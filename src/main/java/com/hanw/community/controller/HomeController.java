@@ -4,7 +4,9 @@ import com.hanw.community.entity.DiscussPost;
 import com.hanw.community.entity.Page;
 import com.hanw.community.entity.User;
 import com.hanw.community.service.DiscussPostService;
+import com.hanw.community.service.LikeService;
 import com.hanw.community.service.UserService;
+import com.hanw.community.util.CommunityConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,12 +20,14 @@ import java.util.*;
  * @create 2022-07-30 20:48
  */
 @Controller
-public class HomeController {
+public class HomeController implements CommunityConstant {
 
     @Autowired
     private DiscussPostService discussPostService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private LikeService likeService;
 
     @RequestMapping(path = "/index", method = RequestMethod.GET)
     public String getIndexPage(Model model, Page page){
@@ -40,9 +44,14 @@ public class HomeController {
                 map.put("post",post);
                 User user = userService.findUserById(post.getUserId());
                 map.put("user",user);
+
+                long likeCount = likeService.findEntityLikeCount(EMTITY_TYPE_POST, post.getId());
+                map.put("likeCount",likeCount);
+
                 discussPosts.add(map);
             }
         }
+
         //model的数据，只能在接下来的页面使用(与session域相似)
         model.addAttribute("discussPosts",discussPosts);
         return "/index";

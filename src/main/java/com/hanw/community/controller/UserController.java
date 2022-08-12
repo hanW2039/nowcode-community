@@ -2,14 +2,17 @@ package com.hanw.community.controller;
 
 import com.hanw.community.annotation.LoginRequired;
 import com.hanw.community.entity.User;
+import com.hanw.community.service.LikeService;
 import com.hanw.community.service.UserService;
 import com.hanw.community.util.CommunityUtil;
 import com.hanw.community.util.HostHolder;
+import com.hanw.community.util.RedisKeyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -44,6 +47,8 @@ public class UserController {
     private UserService userService;
     @Autowired
     private HostHolder hostHolder;
+    @Autowired
+    private LikeService likeService;
     @LoginRequired
     @RequestMapping(path="/setting",method=RequestMethod.GET)
     public String getSettingPage(){
@@ -140,5 +145,15 @@ public class UserController {
         return "redirect:/login";
     }
 
-
+    @RequestMapping(path="/profile/{userId}",method=RequestMethod.GET)
+    public String getProfilePage(@PathVariable("userId") int userId,Model model){
+        User user = userService.findUserById(userId);
+        if(user == null){
+            throw new RuntimeException("该用户不存在");
+        }
+        model.addAttribute("user",user);
+        int likeCount = likeService.findUserLikeCount(userId);
+        model.addAttribute("likeCount",likeCount);
+        return "/site/profile";
+    }
 }
