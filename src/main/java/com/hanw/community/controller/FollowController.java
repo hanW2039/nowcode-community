@@ -1,8 +1,10 @@
 package com.hanw.community.controller;
 
 import com.hanw.community.annotation.LoginRequired;
+import com.hanw.community.entity.Event;
 import com.hanw.community.entity.Page;
 import com.hanw.community.entity.User;
+import com.hanw.community.event.EventProducer;
 import com.hanw.community.service.FollowService;
 import com.hanw.community.service.UserService;
 import com.hanw.community.util.CommunityConstant;
@@ -31,12 +33,26 @@ public class FollowController implements CommunityConstant {
     private HostHolder hostHolder;
     @Autowired
     private UserService userService;
+    @Autowired
+    private EventProducer eventProducer;
+
     @RequestMapping(path="/follow",method= RequestMethod.POST)
     @ResponseBody
     @LoginRequired
     public String follow(int entityType,int entityId){
         User user = hostHolder.getUser();
         followService.follow(entityType,entityId,user.getId());
+
+        //触发关注事件
+        Event event = new Event()
+                .setTopic(TOPIC_FOLLOW)
+                .setUserId(hostHolder.getUser().getId())
+                .setEntityType(entityType)
+                .setEntityId(entityId)
+                .setEntityUserId(entityId);
+        eventProducer.fireEvent(event);
+
+
         return CommunityUtil.getJSONString(0,"已关注");
     }
 

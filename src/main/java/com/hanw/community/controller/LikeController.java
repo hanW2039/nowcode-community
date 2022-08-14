@@ -1,8 +1,11 @@
 package com.hanw.community.controller;
 
 import com.hanw.community.annotation.LoginRequired;
+import com.hanw.community.entity.Event;
 import com.hanw.community.entity.User;
+import com.hanw.community.event.EventProducer;
 import com.hanw.community.service.LikeService;
+import com.hanw.community.util.CommunityConstant;
 import com.hanw.community.util.CommunityUtil;
 import com.hanw.community.util.HostHolder;
 import org.aspectj.lang.annotation.Aspect;
@@ -20,15 +23,18 @@ import java.util.Map;
  * @create 2022-08-11 19:38
  */
 @Controller
-public class LikeController {
+public class LikeController implements CommunityConstant {
     @Autowired
     private LikeService likeService;
     @Autowired
     private HostHolder hostHolder;
+    @Autowired
+    private EventProducer eventProducer;
+
     @RequestMapping(path="/like",method= RequestMethod.POST)
     @ResponseBody
     @LoginRequired
-    public String like(int entityType,int entityId,int entityUserId){
+    public String like(int entityType,int entityId,int entityUserId,int postId){
         User user = hostHolder.getUser();
         //点赞
         likeService.like(user.getId(), entityType,entityId,entityUserId);
@@ -39,6 +45,19 @@ public class LikeController {
         Map<String,Object> map = new HashMap<>();
         map.put("likeCount",likeCount);
         map.put("likeStatus",likeStatus);
+
+        //触发点赞事件
+        if(likeStatus == 1){
+            Event event = new Event()
+                    .setTopic(TOPIC_LIKE)
+                    .setUserId(hostHolder.getUser().getId())
+                    .setEntityType(entityType)
+                    .setEntityId(entityId)
+                    .setEntityUserId(entityUserId)
+                    .setData("postId",postId);
+            eventProducer.fireEvent(event);
+        }
+
         return CommunityUtil.getJSONString(0,null,map);
     }
 }

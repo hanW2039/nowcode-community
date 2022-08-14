@@ -1,10 +1,8 @@
 package com.hanw.community.config;
 
-import com.hanw.community.annotation.LoginRequired;
-import com.hanw.community.dao.LoginTicketMapper;
-import com.hanw.community.interceptor.LoginRequiredInteceptor;
-import com.hanw.community.interceptor.LoginTicketInterceptor;
-import com.hanw.community.util.HostHolder;
+import com.hanw.community.controller.interceptor.LoginRequiredInteceptor;
+import com.hanw.community.controller.interceptor.LoginTicketInterceptor;
+import com.hanw.community.controller.interceptor.MessageInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -20,12 +18,16 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private LoginTicketInterceptor loginTicketInterceptor;
     @Autowired
     private LoginRequiredInteceptor loginRequiredInteceptor;
+    @Autowired
+    private MessageInterceptor messageInterceptor;
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(loginTicketInterceptor)
                 .excludePathPatterns("/**/*.css","/**/*.js","/**/*.png","/**/*.jpg","/**/*.jpeg");
 
         registry.addInterceptor(loginRequiredInteceptor)
+                .excludePathPatterns("/**/*.css","/**/*.js","/**/*.png","/**/*.jpg","/**/*.jpeg");
+        registry.addInterceptor(messageInterceptor)
                 .excludePathPatterns("/**/*.css","/**/*.js","/**/*.png","/**/*.jpg","/**/*.jpeg");
     }
 

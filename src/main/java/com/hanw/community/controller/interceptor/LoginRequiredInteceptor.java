@@ -1,7 +1,6 @@
-package com.hanw.community.interceptor;
+package com.hanw.community.controller.interceptor;
 
 import com.hanw.community.annotation.LoginRequired;
-import com.hanw.community.entity.User;
 import com.hanw.community.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
