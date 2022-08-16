@@ -1,9 +1,7 @@
 package com.hanw.community.controller;
 
-import com.hanw.community.entity.Comment;
-import com.hanw.community.entity.DiscussPost;
-import com.hanw.community.entity.Page;
-import com.hanw.community.entity.User;
+import com.hanw.community.entity.*;
+import com.hanw.community.event.EventProducer;
 import com.hanw.community.service.CommentService;
 import com.hanw.community.service.DiscussPostService;
 import com.hanw.community.service.LikeService;
@@ -39,6 +37,8 @@ public class DiscussPostController implements CommunityConstant {
     private CommentService commentService;
     @Autowired
     private LikeService likeService;
+    @Autowired
+    private EventProducer eventProducer;
 
     @RequestMapping(path="/add",method = RequestMethod.POST)
     @ResponseBody
@@ -53,6 +53,13 @@ public class DiscussPostController implements CommunityConstant {
         post.setContent(content);
         post.setCreateTime(new Date());
         discussPostService.addDiscussPost(post);
+        //触发发帖事件，将新帖发布到es里
+        Event event = new Event()
+                .setTopic(TOPIC_PUBLISH)
+                .setUserId(user.getId())
+                .setEntityType(EMTITY_TYPE_POST)
+                .setEntityId(post.getId());
+        eventProducer.fireEvent(event);
 
         return CommunityUtil.getJSONString(0,"发布成功！");
     }

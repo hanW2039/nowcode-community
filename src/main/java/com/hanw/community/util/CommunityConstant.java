@@ -31,22 +31,17 @@ public interface CommunityConstant {
      */
     int EMTITY_TYPE_USER = 3;
 
-    /*
-        topic 评论
-     */
+    //topic 评论
     String TOPIC_COMMENT = "comment";
-
-    /*
-        topic 点赞
-     */
+    //topic 点赞
     String TOPIC_LIKE = "like";
-
-    /*
-        topic 关注
-     */
+    //topic 关注
     String TOPIC_FOLLOW = "follow";
-    /*
-        系统用户ID
-     */
+    //topic 发帖
+    String TOPIC_PUBLISH = "publish";
+
+    //系统用户ID
     int SYSTEM_ID = 1;
+
+
 }

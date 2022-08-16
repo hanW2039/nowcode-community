@@ -1,8 +1,11 @@
 package com.hanw.community.event;
 
 import com.alibaba.fastjson.JSONObject;
+import com.hanw.community.entity.DiscussPost;
 import com.hanw.community.entity.Event;
 import com.hanw.community.entity.Message;
+import com.hanw.community.service.DiscussPostService;
+import com.hanw.community.service.ElasticsearchService;
 import com.hanw.community.service.MessageService;
 import com.hanw.community.util.CommunityConstant;
 import com.hanw.community.util.CommunityUtil;
@@ -27,7 +30,10 @@ public class EventConsumer implements CommunityConstant {
     private static Logger logger= LoggerFactory.getLogger(EventConsumer.class);
     @Autowired
     private MessageService messageService;
-
+    @Autowired
+    private ElasticsearchService elasticsearchService;
+    @Autowired
+    private DiscussPostService discussPostService;
     @KafkaListener(topics = {TOPIC_COMMENT,TOPIC_LIKE,TOPIC_FOLLOW})
     public void handleCommentMessage(ConsumerRecord record){
         if(record == null || record.value() == null){
@@ -57,5 +63,21 @@ public class EventConsumer implements CommunityConstant {
         }
         message.setContent(JSONObject.toJSONString(content));
         messageService.addMessage(message);
+    }
+    //消费发帖事件
+    @KafkaListener(topics = {TOPIC_PUBLISH})
+    public void handlePublishMessage(ConsumerRecord record){
+        if(record == null || record.value() == null){
+            logger.error("消息内容为空！");
+            return;
+        }
+        Event event = JSONObject.parseObject(record.value().toString(), Event.class);
+        if(event == null){
+            logger.error("消息格式错误");
+            return;
+        }
+
+        DiscussPost discussPost = discussPostService.findDiscussPostById(event.getEntityId());
+        elasticsearchService.saveDiscussPost(discussPost);
     }
 }
