@@ -39,9 +39,17 @@ public interface CommunityConstant {
     String TOPIC_FOLLOW = "follow";
     //topic 发帖
     String TOPIC_PUBLISH = "publish";
+    //topic 删帖
+    String TOPIC_DELETE ="delete";
+
 
     //系统用户ID
     int SYSTEM_ID = 1;
 
-
+    //权限 ：普通用户
+    String AUTHORITY_USER = "user";
+    //权限 ：超级管理员
+    String AUTHORITY_ADMIN = "admin";
+    //权限 ：版主
+    String AUTHORITY_MODERATOR = "moderator";
 }

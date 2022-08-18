@@ -53,6 +53,6 @@ public class RedisKeyUtil {
     }
     //user
     public static String getUserKey(int userId){
-        return PREFIX_TICKET + SPLIT + userId;
+        return PREFIX_USER + SPLIT + userId;
     }
 }

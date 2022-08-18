@@ -9,6 +9,7 @@ import java.lang.annotation.Target;
  * @author hanW
  * @create 2022-08-05 19:38
  */
+@Deprecated
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LoginRequired {

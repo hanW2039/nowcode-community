@@ -5,6 +5,8 @@ $(function(){
 function follow() {
 	var btn = this;
 	var entityId = $("#entityId").val();
+
+
 	if($(btn).hasClass("btn-info")) {
 		// 关注TA
 		$.post(
