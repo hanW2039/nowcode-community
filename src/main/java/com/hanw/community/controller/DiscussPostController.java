@@ -9,8 +9,10 @@ import com.hanw.community.service.UserService;
 import com.hanw.community.util.CommunityConstant;
 import com.hanw.community.util.CommunityUtil;
 import com.hanw.community.util.HostHolder;
+import com.hanw.community.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +41,8 @@ public class DiscussPostController implements CommunityConstant {
     private LikeService likeService;
     @Autowired
     private EventProducer eventProducer;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @RequestMapping(path="/add",method = RequestMethod.POST)
     @ResponseBody
@@ -60,6 +64,10 @@ public class DiscussPostController implements CommunityConstant {
                 .setEntityType(EMTITY_TYPE_POST)
                 .setEntityId(post.getId());
         eventProducer.fireEvent(event);
+
+        //计算帖子的分数
+        String postScoreKey = RedisKeyUtil.getPostScoreKey();
+        redisTemplate.opsForSet().add(postScoreKey,post.getId());
 
         return CommunityUtil.getJSONString(0,"发布成功！");
     }
@@ -160,8 +168,8 @@ public class DiscussPostController implements CommunityConstant {
     @ResponseBody
     public String setWonderful(int id) {
         DiscussPost discussPostById = discussPostService.findDiscussPostById(id);
-        int status = discussPostById.getStatus()^1;
         // 1为加精，0为正常， 1^1=0, 0^1=1
+        int status = discussPostById.getStatus()^1;
         discussPostService.updateStatus(id, status);
         // 返回的结果
         Map<String, Object> map = new HashMap<>();
@@ -174,6 +182,10 @@ public class DiscussPostController implements CommunityConstant {
                 .setEntityType(EMTITY_TYPE_POST)
                 .setEntityId(id);
         eventProducer.fireEvent(event);
+
+        //计算帖子的分数
+        String postScoreKey = RedisKeyUtil.getPostScoreKey();
+        redisTemplate.opsForSet().add(postScoreKey,id);
 
         return CommunityUtil.getJSONString(0, null, map);
     }

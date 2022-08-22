@@ -1,12 +1,10 @@
 package com.hanw.community.util;
 
-import com.sun.xml.internal.fastinfoset.sax.Properties;
 import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
-import sun.text.normalizer.Trie;
 
 import javax.annotation.PostConstruct;
 import java.io.*;

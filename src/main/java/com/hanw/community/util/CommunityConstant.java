@@ -41,7 +41,8 @@ public interface CommunityConstant {
     String TOPIC_PUBLISH = "publish";
     //topic 删帖
     String TOPIC_DELETE ="delete";
-
+    //topic 分享
+    String TOPIC_SHARE = "share";
 
     //系统用户ID
     int SYSTEM_ID = 1;
@@ -52,4 +53,6 @@ public interface CommunityConstant {
     String AUTHORITY_ADMIN = "admin";
     //权限 ：版主
     String AUTHORITY_MODERATOR = "moderator";
+
+
 }
